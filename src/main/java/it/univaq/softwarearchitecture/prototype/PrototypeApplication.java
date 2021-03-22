@@ -11,7 +11,7 @@ public class PrototypeApplication {
 
     @GetMapping("/")
     public String start() {
-        return "Servizio T1";
+        return "Servizio T1 v2";
     }
 
     @GetMapping("/test")
