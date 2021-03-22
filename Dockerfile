@@ -1,13 +1,3 @@
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
 FROM maven:3.5.2-jdk-8-alpine AS MAVEN_TOOL_CHAIN
 COPY pom.xml /tmp/
 COPY src /tmp/src/
