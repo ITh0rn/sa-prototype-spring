@@ -1,0 +1,160 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <meta name="theme-color" content="#772953">
+</head>
+
+<body class="bg-aubergine">
+<nav class="navbar navbar-dark bg-dark-aubergine">
+  <div class="container">
+    <a class="navbar-brand" href="#">NNF exc</a>
+    <a class="navbar-brand" href="#">Progetto SA 20/21</a>
+  </div>
+</nav>
+<div class="container">
+<div class="alert hide" id="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+  The server workload has passed to AWS. It will become available again when the server is reachable.
+</div>
+</div>
+<div class="container mt-5">
+  <div class="col-lg-12 row">
+    <div class="jumbotron jumbotron-fluid">
+      <div class="container">
+        <h1 class="display-4 text-white">Kubernetes Dashboard</h1>
+        <p class="lead text-white">In the card below are showed infos about the CPU usage of each cluster of kubeadm.</p>
+      </div>
+    </div>
+    <!-- Image and text -->
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-header">Utilizzo CPU Cluster 1</div>
+        <div class="card-body d-flex align-items-center d-flex justify-content-center">
+          <div class="progress-container" id="progress-1"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-header">Utilizzo CPU Cluster 2</div>
+        <div class="card-body d-flex align-items-center d-flex justify-content-center">
+          <div class="progress-container" id="progress-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="js/bootstrap.js"></script>
+<script src="js/main.js"></script>
+<script src="js/progress-bar.js"></script>
+<script src="js/jquery.js"></script>
+<script src="js/axios.js"></script>
+<script>
+  var bar = new ProgressBar.SemiCircle('#progress-1', {
+    strokeWidth: 6,
+    color: '#FFEA82',
+    trailColor: '#eee',
+    trailWidth: 1,
+    easing: 'easeInOut',
+    duration: 1400,
+    svgStyle: null,
+    text: {
+      value: '',
+      alignToBottom: false
+    },
+    from: {color: '#FFEA82'},
+    to: {color: '#ED6A5A'},
+    // Set default step function for all animate calls
+    step: (state, bar) => {
+      bar.path.setAttribute('stroke', state.color);
+      var value = Math.round(bar.value() * 100);
+      if (value === 0) {
+        bar.setText('');
+      } else {
+        bar.setText(value);
+      }
+
+      bar.text.style.color = state.color;
+    }
+  });
+  bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+  bar.text.style.fontSize = '2rem';
+
+  var bar1 = new ProgressBar.SemiCircle('#progress-2', {
+    strokeWidth: 6,
+    color: '#FFEA82',
+    trailColor: '#eee',
+    trailWidth: 1,
+    easing: 'easeInOut',
+    duration: 1400,
+    svgStyle: null,
+    text: {
+      value: '',
+      alignToBottom: false
+    },
+    from: {color: '#FFEA82'},
+    to: {color: '#ED6A5A'},
+    // Set default step function for all animate calls
+    step: (state, bar1) => {
+      bar1.path.setAttribute('stroke', state.color);
+      var value = Math.round(bar1.value() * 100);
+      if (value === 0) {
+        bar1.setText('');
+      } else {
+        bar1.setText(value);
+      }
+
+      bar1.text.style.color = state.color;
+    }
+  });
+  bar1.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+  bar1.text.style.fontSize = '2rem';
+
+  const BASE_URL = 'http://localhost:80';
+
+  const getCpuUsage = async (node_name, cpu_num) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/apis/metrics.k8s.io/v1beta1/nodes/${node_name}`);
+      let cpu_nano = response.data.usage.cpu;
+      cpu_nano = cpu_nano.slice(0, -1);
+      var cpu_usage = (cpu_nano/1000000000)/cpu_num;
+      console.log('GET: Heres the list of todos', cpu_usage);
+
+      return cpu_usage;
+    } catch (errors) {
+      return new Promise().reject();
+    }
+  };
+
+  const interval = setInterval(function() {
+    getCpuUsage('pop-os', 4)
+    .then((val) => {
+      bar.animate(val);
+      if(val>=0.8){
+        $("#alert").show();
+      }
+    });
+    getCpuUsage('imsloww', 2)
+    .then((val) => {
+      bar1.animate(val);
+      if(val>=0.8){
+        $("#alert").show();
+      }
+    })
+    .catch((err) => console.log("Sa rutt"));
+  }, 5000);
+
+</script>
+</body>
+
+</html>
